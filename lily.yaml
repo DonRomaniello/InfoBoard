@@ -1,0 +1,217 @@
+external_components:
+  - source:
+      type: git
+      url: https://github.com/vbaksa/esphome
+      ref: dev
+    components: [lilygo_t5_47_display, lilygo_t5_47_battery]
+
+
+substitutions:
+  esp_name: ESP Display #Device Name
+  esp_hostname: esp-display 
+  run_time: 30s #can be as long as needed to get data 
+  sleep_time: 120s # normal sleep time
+  night_sleep_time: 6h # 1st sleep time after midnight
+  
+esphome:
+  name: ${esp_hostname}
+  platform: ESP32
+  board: esp32dev
+  on_boot:
+  - display.page.show: normal
+  - script.execute: consider_deep_sleep
+  # on_boot:
+  #   - lambda: |-
+  #       id(ota_id).set_auth_password(***REMOVED***);
+
+wifi:
+  ssid: ***REMOVED***
+  password: ***REMOVED***
+  ap:
+    ssid: "${esp_name} Fallback Hotspot"
+    password: ***REMOVED***
+
+ota:
+  password: ***REMOVED***
+  id: ota_id
+
+# Enable logging
+
+logger:
+  level: debug
+
+# Enable Home Assistant API
+api:
+  password: ***REMOVED***
+
+time:
+  - platform: homeassistant
+    id: ntp
+
+# spi:
+#   clk_pin: 18
+#   mosi_pin: 23
+
+font:
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Regular.ttf"
+    id: ubuntu36
+    size: 36
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu40
+    size: 40
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu55
+    size: 55
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu88
+    size: 88
+
+sensor:
+  - platform: lilygo_t5_47_battery
+    id: battery
+    update_interval: 20s
+    voltage:
+      name: "Battery Voltage"
+
+text_sensor:
+#Q69
+  #Steinway
+  - platform: homeassistant
+    id: q69sA
+    entity_id: sensor.q69s0
+    internal: true
+  - platform: homeassistant
+    id: q69sB
+    entity_id: sensor.q69s1
+    internal: true
+  - platform: homeassistant
+    id: q69sC
+    entity_id: sensor.q69s2
+    internal: true    
+  #Plaza
+  - platform: homeassistant
+    id: q69pA
+    entity_id: sensor.q69p0
+    internal: true
+  - platform: homeassistant
+    id: q69pB
+    entity_id: sensor.q69p1
+    internal: true
+  - platform: homeassistant
+    id: q69pC
+    entity_id: sensor.q69p2
+    internal: true
+#Q100
+  #Steinway
+  - platform: homeassistant
+    id: q100sA
+    entity_id: sensor.q100s0
+    internal: true
+  - platform: homeassistant
+    id: q100sB
+    entity_id: sensor.q100s1
+    internal: true
+  - platform: homeassistant
+    id: q100sC
+    entity_id: sensor.q100s2
+    internal: true    
+  #Plaza
+  - platform: homeassistant
+    id: q100pA
+    entity_id: sensor.q100p0
+    internal: true
+  - platform: homeassistant
+    id: q100pB
+    entity_id: sensor.q100p1
+    internal: true
+  - platform: homeassistant
+    id: q100pC
+    entity_id: sensor.q100p2
+    internal: true
+
+# Touch
+
+esp32_touch:
+
+binary_sensor:
+  - platform: esp32_touch
+    name: "TouchTest"
+    pin: GPIO13
+    threshold: 700
+    wakeup_threshold: 700
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    name: Prevent Deep Sleep
+    entity_id: input_boolean.prevent_deep_sleep
+
+
+# Deep Sleep
+
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: ${sleep_time}
+  run_duration: ${run_time}
+  touch_wakeup: true
+  
+
+script:
+  - id: consider_deep_sleep
+    mode: queued
+    then:
+      - display.page.show: normal
+      - delay: ${run_time}
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+            - deep_sleep.prevent: deep_sleep_control
+          else:
+            - deep_sleep.enter: deep_sleep_control
+      - script.execute: consider_deep_sleep
+
+
+
+image:
+  - file: "./images/lilyLayoutScaledBackground.png"
+    id: background
+    dither: FLOYDSTEINBERG
+
+
+# Display is not centered.
+# Shift everything right by 4 px, giving 536 width
+display:
+  - platform: lilygo_t5_47_display
+    clear: false
+    update_interval: 10s
+    rotation: 270
+    pages:
+      - id: normal
+        lambda: |-
+          
+          it.image(12, 8, id(background));
+
+          // Steinway
+          it.print(64, 17, id(ubuntu36), "Steinway");
+          it.print(102, 72, id(ubuntu40), "q69");      
+          it.printf(26, 126, id(ubuntu88), "%s", id(q69sA).state.c_str());
+          it.print(90, 232, id(ubuntu40), "q100");
+          it.printf(26, 285, id(ubuntu88), "%s", id(q100sA).state.c_str());
+          
+          // Plaza
+          it.print(359, 17, id(ubuntu36), "Plaza");
+          it.print(368, 72, id(ubuntu40), "q69");
+          it.printf(291, 126, id(ubuntu88), "%s", id(q69pA).state.c_str());
+          it.print(357, 232, id(ubuntu40), "q100");
+          it.printf(291, 285, id(ubuntu88), "%s", id(q100pA).state.c_str());
+      - id: notsleepy
+        lambda: |-
+          it.print(270, 500, id(ubuntu36), "NO!");
+
+      
+      
+      
+
+
+
+
