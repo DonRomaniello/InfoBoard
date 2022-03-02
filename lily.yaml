@@ -48,10 +48,6 @@ time:
   - platform: homeassistant
     id: ntp
 
-# spi:
-#   clk_pin: 18
-#   mosi_pin: 23
-
 font:
   - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Regular.ttf"
     id: ubuntu36
@@ -80,6 +76,10 @@ text_sensor:
     id: q69sA
     entity_id: sensor.q69s0
     internal: true
+    on_value: 
+      then:
+        - display.page.show: busRefresh
+        - component.update: eInkDisplay
   - platform: homeassistant
     id: q69sB
     entity_id: sensor.q69s1
@@ -93,6 +93,10 @@ text_sensor:
     id: q69pA
     entity_id: sensor.q69p0
     internal: true
+    on_value: 
+      then:
+        - display.page.show: busRefresh
+        - component.update: eInkDisplay
   - platform: homeassistant
     id: q69pB
     entity_id: sensor.q69p1
@@ -107,6 +111,10 @@ text_sensor:
     id: q100sA
     entity_id: sensor.q100s0
     internal: true
+    on_value:
+      then:
+        - display.page.show: busRefresh
+        - component.update: eInkDisplay
   - platform: homeassistant
     id: q100sB
     entity_id: sensor.q100s1
@@ -120,6 +128,10 @@ text_sensor:
     id: q100pA
     entity_id: sensor.q100p0
     internal: true
+    on_value:
+      then:
+        - display.page.show: busRefresh
+        - component.update: eInkDisplay
   - platform: homeassistant
     id: q100pB
     entity_id: sensor.q100p1
@@ -182,8 +194,9 @@ image:
 # Shift everything right by 4 px, giving 536 width
 display:
   - platform: lilygo_t5_47_display
+    id: eInkDisplay
     clear: false
-    update_interval: 10s
+    update_interval: never
     rotation: 270
     pages:
       - id: normal
@@ -204,9 +217,12 @@ display:
           it.printf(291, 126, id(ubuntu88), "%s", id(q69pA).state.c_str());
           it.print(357, 232, id(ubuntu40), "q100");
           it.printf(291, 285, id(ubuntu88), "%s", id(q100pA).state.c_str());
-      - id: notsleepy
+      - id: busRefresh
         lambda: |-
-          it.print(270, 500, id(ubuntu36), "NO!");
+          it.printf(26, 126, id(ubuntu88), "%s", id(q69sA).state.c_str());
+          it.printf(291, 126, id(ubuntu88), "%s", id(q69pA).state.c_str());
+          it.printf(26, 285, id(ubuntu88), "%s", id(q100sA).state.c_str());
+          it.printf(291, 285, id(ubuntu88), "%s", id(q100pA).state.c_str());
 
       
       
