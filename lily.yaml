@@ -8,17 +8,17 @@ external_components:
 
 substitutions:
   esp_name: ESP Display #Device Name
-  esp_hostname: esp-display 
-  run_time: 30s #can be as long as needed to get data 
+  esp_hostname: esp-display
+  run_time: 15s #can be as long as needed to get data
   sleep_time: 120s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
-  
+
 esphome:
   name: ${esp_hostname}
   platform: ESP32
   board: esp32dev
   on_boot:
-  - display.page.show: normal
+  - display.page.show: backPage
   - script.execute: consider_deep_sleep
   # on_boot:
   #   - lambda: |-
@@ -76,10 +76,9 @@ text_sensor:
     id: q69sA
     entity_id: sensor.q69s0
     internal: true
-    on_value: 
+    on_value:
       then:
         - display.page.show: busRefresh
-        - component.update: eInkDisplay
   - platform: homeassistant
     id: q69sB
     entity_id: sensor.q69s1
@@ -87,16 +86,15 @@ text_sensor:
   - platform: homeassistant
     id: q69sC
     entity_id: sensor.q69s2
-    internal: true    
+    internal: true
   #Plaza
   - platform: homeassistant
     id: q69pA
     entity_id: sensor.q69p0
     internal: true
-    on_value: 
+    on_value:
       then:
         - display.page.show: busRefresh
-        - component.update: eInkDisplay
   - platform: homeassistant
     id: q69pB
     entity_id: sensor.q69p1
@@ -114,7 +112,6 @@ text_sensor:
     on_value:
       then:
         - display.page.show: busRefresh
-        - component.update: eInkDisplay
   - platform: homeassistant
     id: q100sB
     entity_id: sensor.q100s1
@@ -122,7 +119,7 @@ text_sensor:
   - platform: homeassistant
     id: q100sC
     entity_id: sensor.q100s2
-    internal: true    
+    internal: true
   #Plaza
   - platform: homeassistant
     id: q100pA
@@ -131,7 +128,6 @@ text_sensor:
     on_value:
       then:
         - display.page.show: busRefresh
-        - component.update: eInkDisplay
   - platform: homeassistant
     id: q100pB
     entity_id: sensor.q100p1
@@ -151,6 +147,15 @@ binary_sensor:
     pin: GPIO13
     threshold: 700
     wakeup_threshold: 700
+  - platform: gpio
+    pin:
+      number: GPIO39
+      inverted: true
+    name: "${esp_name} Button 1"
+    internal: true
+    on_press:
+      then:
+       - script.execute: refresh_display
   - platform: homeassistant
     id: prevent_deep_sleep
     name: Prevent Deep Sleep
@@ -164,14 +169,14 @@ deep_sleep:
   sleep_duration: ${sleep_time}
   run_duration: ${run_time}
   touch_wakeup: true
-  
+
 
 script:
   - id: consider_deep_sleep
     mode: queued
     then:
-      - display.page.show: normal
       - delay: ${run_time}
+      - component.update: eInkDisplay
       - if:
           condition:
             binary_sensor.is_on: prevent_deep_sleep
@@ -181,6 +186,15 @@ script:
           else:
             - deep_sleep.enter: deep_sleep_control
       - script.execute: consider_deep_sleep
+  - id: refresh_display
+    then:
+      - repeat:
+          count: 1
+          then:
+          - display.page.show: black
+          - component.update: eInkDisplay
+          - display.page.show: blank
+          - component.update: eInkDisplay
 
 
 
@@ -199,24 +213,28 @@ display:
     update_interval: never
     rotation: 270
     pages:
-      - id: normal
+      - id: backPage
         lambda: |-
-          
           it.image(12, 8, id(background));
-
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
-          it.print(102, 72, id(ubuntu40), "q69");      
-          it.printf(26, 126, id(ubuntu88), "%s", id(q69sA).state.c_str());
+          it.print(102, 72, id(ubuntu40), "q69");
           it.print(90, 232, id(ubuntu40), "q100");
-          it.printf(26, 285, id(ubuntu88), "%s", id(q100sA).state.c_str());
-          
+
           // Plaza
           it.print(359, 17, id(ubuntu36), "Plaza");
           it.print(368, 72, id(ubuntu40), "q69");
-          it.printf(291, 126, id(ubuntu88), "%s", id(q69pA).state.c_str());
           it.print(357, 232, id(ubuntu40), "q100");
-          it.printf(291, 285, id(ubuntu88), "%s", id(q100pA).state.c_str());
+      - id: busBlank
+        lambda: |-
+          it.filled_rectangle(36, 137, 210, 65, COLOR_OFF);
+          it.filled_rectangle(281, 137, 210, 65, COLOR_OFF);
+          it.filled_rectangle(36, 296, 210, 65, COLOR_OFF);
+          it.filled_rectangle(281, 296, 210, 65, COLOR_OFF);
+
+
+
+
       - id: busRefresh
         lambda: |-
           it.printf(26, 126, id(ubuntu88), "%s", id(q69sA).state.c_str());
@@ -224,9 +242,17 @@ display:
           it.printf(26, 285, id(ubuntu88), "%s", id(q100sA).state.c_str());
           it.printf(291, 285, id(ubuntu88), "%s", id(q100pA).state.c_str());
 
-      
-      
-      
+      - id: black
+        lambda: |-
+          it.filled_rectangle(0,0, 540, 960);
+
+      - id: blank
+        lambda: |-
+          it.filled_rectangle(0,0, 540, 960, COLOR_OFF);
+
+
+
+
 
 
 
