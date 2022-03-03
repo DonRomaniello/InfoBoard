@@ -9,7 +9,7 @@ external_components:
 substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
-  run_time: 15s #can be as long as needed to get data
+  run_time: 30s #can be as long as needed to get data
   sleep_time: 120s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
@@ -27,6 +27,15 @@ esphome:
 wifi:
   ssid: ***REMOVED***
   password: ***REMOVED***
+
+  manual_ip:
+    static_ip: 192.168.1.49
+    gateway: 192.168.1.1
+    subnet: 255.255.255.0
+
+  fast_connect: true
+
+
   ap:
     ssid: "${esp_name} Fallback Hotspot"
     password: ***REMOVED***
@@ -47,6 +56,22 @@ api:
 time:
   - platform: homeassistant
     id: ntp
+  - platform: sntp
+    on_time:
+      # Every 5 minutes
+      - seconds: 0
+        minutes: /1
+        then:
+          - component.update: eInkDisplay
+  - platform: sntp
+    # ...
+    on_time:
+      # Every 5 minutes
+      - seconds: 0
+        minutes: /15
+        then:
+          - component.update: battery
+
 
 font:
   - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Regular.ttf"
@@ -65,17 +90,39 @@ font:
 sensor:
   - platform: lilygo_t5_47_battery
     id: battery
-    update_interval: 20s
+    update_interval: never
     voltage:
       name: "Battery Voltage"
+#Bikes
+  - platform: homeassistant
+    id: crescent
+    entity_id: sensor.crescentbikes
+    internal: true
+  - platform: homeassistant
+    id: shore
+    entity_id: sensor.shorebikes
+    internal: true
+  - platform: homeassistant
+    id: parkside
+    entity_id: sensor.parksidebikes
+    internal: true
+  - platform: homeassistant
+    id: cherry
+    entity_id: sensor.cherrybikes
+    internal: true
+
 
 text_sensor:
-#Q69
-  #Steinway
+#Busses
+  #Q69
+    #Steinway
   - platform: homeassistant
     id: q69sA
     entity_id: sensor.q69s0
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
@@ -83,15 +130,24 @@ text_sensor:
     id: q69sB
     entity_id: sensor.q69s1
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q69sC
     entity_id: sensor.q69s2
     internal: true
-  #Plaza
+    filters:
+    - substitute:
+      - "unavailable -> "
+    #Plaza
   - platform: homeassistant
     id: q69pA
     entity_id: sensor.q69p0
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
@@ -99,16 +155,25 @@ text_sensor:
     id: q69pB
     entity_id: sensor.q69p1
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q69pC
     entity_id: sensor.q69p2
     internal: true
-#Q100
-  #Steinway
+    filters:
+    - substitute:
+      - "unavailable -> "
+  #Q100
+    #Steinway
   - platform: homeassistant
     id: q100sA
     entity_id: sensor.q100s0
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
@@ -116,15 +181,24 @@ text_sensor:
     id: q100sB
     entity_id: sensor.q100s1
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q100sC
     entity_id: sensor.q100s2
     internal: true
-  #Plaza
+    filters:
+    - substitute:
+      - "unavailable -> "
+    #Plaza
   - platform: homeassistant
     id: q100pA
     entity_id: sensor.q100p0
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
@@ -132,10 +206,19 @@ text_sensor:
     id: q100pB
     entity_id: sensor.q100p1
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q100pC
     entity_id: sensor.q100p2
     internal: true
+    filters:
+    - substitute:
+      - "unavailable -> "
+
+
+
 
 # Touch
 
@@ -176,7 +259,6 @@ script:
     mode: queued
     then:
       - delay: ${run_time}
-      - component.update: eInkDisplay
       - if:
           condition:
             binary_sensor.is_on: prevent_deep_sleep
@@ -188,20 +270,22 @@ script:
       - script.execute: consider_deep_sleep
   - id: refresh_display
     then:
-      - repeat:
-          count: 1
-          then:
-          - display.page.show: black
-          - component.update: eInkDisplay
-          - display.page.show: blank
-          - component.update: eInkDisplay
-
-
+      - display.page.show: black
+      - component.update: eInkDisplay
+      - display.page.show: blank
+      - component.update: eInkDisplay
 
 image:
   - file: "./images/lilyLayoutScaledBackground.png"
     id: background
     dither: FLOYDSTEINBERG
+
+
+
+
+
+
+
 
 
 # Display is not centered.
@@ -249,11 +333,4 @@ display:
       - id: blank
         lambda: |-
           it.filled_rectangle(0,0, 540, 960, COLOR_OFF);
-
-
-
-
-
-
-
 
