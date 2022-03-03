@@ -17,60 +17,68 @@ esphome:
   name: ${esp_hostname}
   platform: ESP32
   board: esp32dev
-  on_boot:
-  - display.page.show: backPage
-  - script.execute: consider_deep_sleep
-  # on_boot:
-  #   - lambda: |-
-  #       id(ota_id).set_auth_password(***REMOVED***);
 
 wifi:
   ssid: ***REMOVED***
   password: ***REMOVED***
-
   manual_ip:
     static_ip: 192.168.1.49
     gateway: 192.168.1.1
     subnet: 255.255.255.0
-
   fast_connect: true
-
-
-  ap:
-    ssid: "${esp_name} Fallback Hotspot"
-    password: ***REMOVED***
 
 ota:
   password: ***REMOVED***
   id: ota_id
 
-# Enable logging
 
 logger:
   level: debug
 
-# Enable Home Assistant API
 api:
   password: ***REMOVED***
+
+
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: ${sleep_time}
+  touch_wakeup: true
+
+
+
+
 
 time:
   - platform: homeassistant
     id: ntp
   - platform: sntp
     on_time:
-      # Every 5 minutes
+      # Every 1 minute
       - seconds: 0
         minutes: /1
         then:
           - component.update: eInkDisplay
   - platform: sntp
-    # ...
     on_time:
-      # Every 5 minutes
+      # Every 15 minutes
       - seconds: 0
         minutes: /15
         then:
           - component.update: battery
+  - platform: sntp
+    on_time:
+      # Every 30 seconds
+      - seconds: /30
+        then:
+          - if:
+              condition:
+                binary_sensor.is_on: prevent_deep_sleep
+              then:
+                - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+                - deep_sleep.prevent: deep_sleep_control
+              else:
+                - deep_sleep.enter: deep_sleep_control
+
 
 
 font:
@@ -86,6 +94,43 @@ font:
   - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
     id: ubuntu88
     size: 88
+# Touch
+
+esp32_touch:
+
+binary_sensor:
+  - platform: esp32_touch
+    name: "TouchTest"
+    pin: GPIO13
+    threshold: 700
+    wakeup_threshold: 700
+  - platform: gpio
+    pin:
+      number: GPIO39
+      inverted: true
+    name: "${esp_name} Button 1"
+    internal: true
+    on_press:
+      then:
+       - script.execute: refresh_display
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    name: Prevent Deep Sleep
+    entity_id: input_boolean.prevent_deep_sleep
+
+
+# Deep Sleep
+
+
+
+script:
+  - id: refresh_display
+    then:
+      - display.page.show: black
+      - component.update: eInkDisplay
+      - display.page.show: blank
+      - component.update: eInkDisplay
+
 
 sensor:
   - platform: lilygo_t5_47_battery
@@ -220,60 +265,10 @@ text_sensor:
 
 
 
-# Touch
-
-esp32_touch:
-
-binary_sensor:
-  - platform: esp32_touch
-    name: "TouchTest"
-    pin: GPIO13
-    threshold: 700
-    wakeup_threshold: 700
-  - platform: gpio
-    pin:
-      number: GPIO39
-      inverted: true
-    name: "${esp_name} Button 1"
-    internal: true
-    on_press:
-      then:
-       - script.execute: refresh_display
-  - platform: homeassistant
-    id: prevent_deep_sleep
-    name: Prevent Deep Sleep
-    entity_id: input_boolean.prevent_deep_sleep
 
 
-# Deep Sleep
-
-deep_sleep:
-  id: deep_sleep_control
-  sleep_duration: ${sleep_time}
-  run_duration: ${run_time}
-  touch_wakeup: true
 
 
-script:
-  - id: consider_deep_sleep
-    mode: queued
-    then:
-      - delay: ${run_time}
-      - if:
-          condition:
-            binary_sensor.is_on: prevent_deep_sleep
-          then:
-            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
-            - deep_sleep.prevent: deep_sleep_control
-          else:
-            - deep_sleep.enter: deep_sleep_control
-      - script.execute: consider_deep_sleep
-  - id: refresh_display
-    then:
-      - display.page.show: black
-      - component.update: eInkDisplay
-      - display.page.show: blank
-      - component.update: eInkDisplay
 
 image:
   - file: "./images/lilyLayoutScaledBackground.png"
