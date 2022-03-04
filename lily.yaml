@@ -294,13 +294,23 @@ display:
         lambda: |-
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
+          it.line(42, 61, 240, 61);
+          it.line(63, 107, 92, 107);
           it.print(102, 72, id(ubuntu40), "q69");
+          it.line(189, 107, 218, 107);
+          it.line(63, 265, 78, 265);
           it.print(90, 232, id(ubuntu40), "q100");
+          it.line(200, 265, 215, 265);
 
           // Plaza
           it.print(359, 17, id(ubuntu36), "Plaza");
+          it.line(304, 61, 502, 61);
+          it.line(321, 107, 351, 107);
           it.print(368, 72, id(ubuntu40), "q69");
+          it.line(452, 107, 482, 107);
+          it.line(321, 265, 351, 265);
           it.print(357, 232, id(ubuntu40), "q100");
+          it.line(452, 265, 482, 265);
 
           it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
           it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
@@ -333,13 +343,23 @@ display:
 
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
+          it.line(42, 61, 240, 61);
+          it.line(63, 107, 92, 107);
           it.print(102, 72, id(ubuntu40), "q69");
+          it.line(189, 107, 218, 107);
+          it.line(63, 265, 78, 265);
           it.print(90, 232, id(ubuntu40), "q100");
+          it.line(200, 265, 215, 265);
 
           // Plaza
           it.print(359, 17, id(ubuntu36), "Plaza");
+          it.line(304, 61, 502, 61);
+          it.line(321, 107, 351, 107);
           it.print(368, 72, id(ubuntu40), "q69");
+          it.line(452, 107, 482, 107);
+          it.line(321, 265, 351, 265);
           it.print(357, 232, id(ubuntu40), "q100");
+          it.line(452, 265, 482, 265);
 
       - id: black
         lambda: |-
