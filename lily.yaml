@@ -10,7 +10,7 @@ substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
   run_time: 30s #can be as long as needed to get data
-  sleep_time: 120s # normal sleep time
+  sleep_time: 270s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
 esphome:
@@ -50,27 +50,30 @@ deep_sleep:
 
 
 time:
+  - platform: sntp
   - platform: homeassistant
     id: ntp
-  - platform: sntp
+  - platform: homeassistant
     on_time:
       # Every 15 minutes
       - seconds: 0
-        minutes: /15
+        minutes: 0
+        hours: /4
         then:
           - component.update: battery
-  - platform: sntp
+  - platform: homeassistant
     on_time:
-      - seconds: 5
-        minutes: /5
+      - seconds: 0
+        minutes: 0
         then:
           - display.page.show: backgroundPage
-  - platform: sntp
+          - component.update: eInkDisplay
+  - platform: homeassistant
     on_time:
       - seconds: 10,40
         then:
           - component.update: eInkDisplay
-  - platform: sntp
+  - platform: homeassistant
     on_time:
       # Every 30 seconds
       - seconds: 0,30
@@ -289,7 +292,14 @@ display:
     pages:
       - id: busRefresh
         lambda: |-
+          // Steinway
+          it.print(64, 17, id(ubuntu36), "Steinway");
+          it.print(102, 72, id(ubuntu40), "q69");
           it.print(90, 232, id(ubuntu40), "q100");
+
+          // Plaza
+          it.print(359, 17, id(ubuntu36), "Plaza");
+          it.print(368, 72, id(ubuntu40), "q69");
           it.print(357, 232, id(ubuntu40), "q100");
 
           it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
@@ -320,6 +330,16 @@ display:
       - id: backgroundPage
         lambda: |-
           it.image(12, 8, id(background));
+
+          // Steinway
+          it.print(64, 17, id(ubuntu36), "Steinway");
+          it.print(102, 72, id(ubuntu40), "q69");
+          it.print(90, 232, id(ubuntu40), "q100");
+
+          // Plaza
+          it.print(359, 17, id(ubuntu36), "Plaza");
+          it.print(368, 72, id(ubuntu40), "q69");
+          it.print(357, 232, id(ubuntu40), "q100");
 
       - id: black
         lambda: |-
