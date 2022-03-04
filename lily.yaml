@@ -26,14 +26,15 @@ wifi:
     gateway: 192.168.1.1
     subnet: 255.255.255.0
   fast_connect: true
+  power_save_mode: HIGH
 
 ota:
   password: ***REMOVED***
   id: ota_id
 
 
-logger:
-  level: debug
+# logger:
+#   level: debug
 
 api:
   password: ***REMOVED***
@@ -53,13 +54,6 @@ time:
     id: ntp
   - platform: sntp
     on_time:
-      # Every 1 minute
-      - seconds: 0
-        minutes: /1
-        then:
-          - component.update: eInkDisplay
-  - platform: sntp
-    on_time:
       # Every 15 minutes
       - seconds: 0
         minutes: /15
@@ -67,8 +61,19 @@ time:
           - component.update: battery
   - platform: sntp
     on_time:
+      - seconds: 5
+        minutes: /5
+        then:
+          - display.page.show: backgroundPage
+  - platform: sntp
+    on_time:
+      - seconds: 10,40
+        then:
+          - component.update: eInkDisplay
+  - platform: sntp
+    on_time:
       # Every 30 seconds
-      - seconds: /30
+      - seconds: 0,30
         then:
           - if:
               condition:
@@ -79,21 +84,11 @@ time:
               else:
                 - deep_sleep.enter: deep_sleep_control
 
+sun:
+  latitude: 40.7818°
+  longitude: -73.9175°
 
 
-font:
-  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Regular.ttf"
-    id: ubuntu36
-    size: 36
-  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
-    id: ubuntu40
-    size: 40
-  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
-    id: ubuntu55
-    size: 55
-  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
-    id: ubuntu88
-    size: 88
 # Touch
 
 esp32_touch:
@@ -118,20 +113,6 @@ binary_sensor:
     name: Prevent Deep Sleep
     entity_id: input_boolean.prevent_deep_sleep
 
-
-# Deep Sleep
-
-
-
-script:
-  - id: refresh_display
-    then:
-      - display.page.show: black
-      - component.update: eInkDisplay
-      - display.page.show: blank
-      - component.update: eInkDisplay
-
-
 sensor:
   - platform: lilygo_t5_47_battery
     id: battery
@@ -155,6 +136,12 @@ sensor:
     id: cherry
     entity_id: sensor.cherrybikes
     internal: true
+#Sun
+  - platform: sun
+    name: Sun Elevation
+    type: elevation
+    id: sunElevation
+    internal: true
 
 
 text_sensor:
@@ -165,12 +152,12 @@ text_sensor:
     id: q69sA
     entity_id: sensor.q69s0
     internal: true
-    filters:
-    - substitute:
-      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q69sB
     entity_id: sensor.q69s1
@@ -190,12 +177,12 @@ text_sensor:
     id: q69pA
     entity_id: sensor.q69p0
     internal: true
-    filters:
-    - substitute:
-      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q69pB
     entity_id: sensor.q69p1
@@ -216,12 +203,12 @@ text_sensor:
     id: q100sA
     entity_id: sensor.q100s0
     internal: true
-    filters:
-    - substitute:
-      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q100sB
     entity_id: sensor.q100s1
@@ -241,12 +228,12 @@ text_sensor:
     id: q100pA
     entity_id: sensor.q100p0
     internal: true
-    filters:
-    - substitute:
-      - "unavailable -> "
     on_value:
       then:
         - display.page.show: busRefresh
+    filters:
+    - substitute:
+      - "unavailable -> "
   - platform: homeassistant
     id: q100pB
     entity_id: sensor.q100p1
@@ -263,25 +250,33 @@ text_sensor:
       - "unavailable -> "
 
 
+script:
+  - id: refresh_display
+    then:
+      - display.page.show: black
+      - component.update: eInkDisplay
+      - display.page.show: blank
+      - component.update: eInkDisplay
 
 
-
-
-
-
+font:
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Regular.ttf"
+    id: ubuntu36
+    size: 36
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu40
+    size: 40
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu55
+    size: 55
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu88
+    size: 88
 
 image:
   - file: "./images/lilyLayoutScaledBackground.png"
     id: background
     dither: FLOYDSTEINBERG
-
-
-
-
-
-
-
-
 
 # Display is not centered.
 # Shift everything right by 4 px, giving 536 width
@@ -292,9 +287,21 @@ display:
     update_interval: never
     rotation: 270
     pages:
-      - id: backPage
+      - id: busRefresh
         lambda: |-
-          it.image(12, 8, id(background));
+          it.print(90, 232, id(ubuntu40), "q100");
+          it.print(357, 232, id(ubuntu40), "q100");
+
+          it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
+          it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
+          it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
+          it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
+      - id: busBlank
+        lambda: |-
+          it.filled_rectangle(36, 137, 210, 65, COLOR_OFF);
+          it.filled_rectangle(281, 137, 210, 65, COLOR_OFF);
+          it.filled_rectangle(36, 296, 210, 65, COLOR_OFF);
+          it.filled_rectangle(281, 296, 210, 65, COLOR_OFF);
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
           it.print(102, 72, id(ubuntu40), "q69");
@@ -304,22 +311,15 @@ display:
           it.print(359, 17, id(ubuntu36), "Plaza");
           it.print(368, 72, id(ubuntu40), "q69");
           it.print(357, 232, id(ubuntu40), "q100");
-      - id: busBlank
+
+          it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
+          it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
+          it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
+          it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
+
+      - id: backgroundPage
         lambda: |-
-          it.filled_rectangle(36, 137, 210, 65, COLOR_OFF);
-          it.filled_rectangle(281, 137, 210, 65, COLOR_OFF);
-          it.filled_rectangle(36, 296, 210, 65, COLOR_OFF);
-          it.filled_rectangle(281, 296, 210, 65, COLOR_OFF);
-
-
-
-
-      - id: busRefresh
-        lambda: |-
-          it.printf(26, 126, id(ubuntu88), "%s", id(q69sA).state.c_str());
-          it.printf(291, 126, id(ubuntu88), "%s", id(q69pA).state.c_str());
-          it.printf(26, 285, id(ubuntu88), "%s", id(q100sA).state.c_str());
-          it.printf(291, 285, id(ubuntu88), "%s", id(q100pA).state.c_str());
+          it.image(12, 8, id(background));
 
       - id: black
         lambda: |-
