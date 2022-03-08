@@ -62,12 +62,12 @@ time:
   - platform: homeassistant
     on_time:
       - seconds: 0,30
-        minutes: 0-28,30-58
+        minutes: 0-58
         then:
           - script.execute: standard_update
           - script.execute: consider_sleep
       - seconds: 0,30
-        minutes: 29,59
+        minutes: 59
         then:
           - script.execute: background_refresher
           - delay: 5s
@@ -81,18 +81,15 @@ script:
       - display.page.show: black
       - component.update: eInkDisplay
       - display.page.show: blank
-      - component.update: eInkDisplayg
+      - component.update: eInkDisplay
   - id: standard_update
     then:
       - display.page.show: standardRefresh
       - component.update: eInkDisplay
   - id: background_refresher
     then:
-      - component.update: battery
-      - mqtt.publish:
-          topic: "battery/voltage"
-          payload: id(battery).voltage
       - display.page.show: backgroundPage
+      - component.update: battery
       - component.update: eInkDisplay
       - delay: 5s
       - display.page.show: standardRefresh
@@ -293,7 +290,7 @@ display:
     pages:
       - id: standardRefresh
         lambda: |-
-          it.image(12, 8, id(background));
+          // it.image(12, 8, id(background));
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
           it.line(42, 61, 240, 61);
