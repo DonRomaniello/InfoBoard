@@ -10,7 +10,7 @@ substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
   run_time: 30s #can be as long as needed to get data
-  sleep_time: 270s # normal sleep time
+  sleep_time: 30s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
 esphome:
@@ -66,7 +66,7 @@ time:
         then:
           - script.execute: standard_update
           - script.execute: consider_sleep
-      - seconds: 0
+      - seconds: 15
         minutes: 25-29,55-59
         then:
           - script.execute: background_refresher
@@ -289,7 +289,7 @@ display:
     pages:
       - id: standardRefresh
         lambda: |-
-          // it.image(12, 8, id(background));
+          it.image(12, 8, id(background));
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
           it.line(42, 61, 240, 61);
@@ -314,6 +314,8 @@ display:
           it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
           it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
           it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
+
+
 
             //Crescent
               //Wipe
@@ -360,7 +362,6 @@ display:
                 it.filled_circle(332, 424.5, 9.5, COLOR_OFF);
               }
             }
-
 
 
 
@@ -418,3 +419,5 @@ display:
       #     it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
       #     it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
       #     it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
+
+
