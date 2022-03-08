@@ -81,7 +81,7 @@ script:
       - display.page.show: black
       - component.update: eInkDisplay
       - display.page.show: blank
-      - component.update: eInkDisplay
+      - component.update: eInkDisplayg
   - id: standard_update
     then:
       - display.page.show: standardRefresh
