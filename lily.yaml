@@ -62,12 +62,12 @@ time:
   - platform: homeassistant
     on_time:
       - seconds: 0
-        minutes: 5,10,15,20,25,30,35,40,45,50,55
+        minutes: 0-24,30-54
         then:
           - script.execute: standard_update
           - script.execute: consider_sleep
       - seconds: 0
-        minutes: 0
+        minutes: 25-29,55-59
         then:
           - script.execute: background_refresher
           - delay: 5s
@@ -86,13 +86,11 @@ script:
     then:
       - component.update: battery
       - display.page.show: standardRefresh
-      - display.page.show: bikeRefresh
       - component.update: eInkDisplay
   - id: background_refresher
     then:
       - display.page.show: backgroundPage
       - component.update: eInkDisplay
-      - delay: 5s
       - display.page.show: standardRefresh
       - component.update: eInkDisplay
   - id: consider_sleep
@@ -317,17 +315,18 @@ display:
           it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
           it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
 
-
-      - id: bikeRefresh
-        lambda: |-
-            //Wipe
+            //Crescent
+              //Wipe
             it.filled_circle(272, 417, 12.5, COLOR_OFF);
             it.filled_circle(231, 420, 12.5, COLOR_OFF);
             it.filled_circle(313, 420, 12.5, COLOR_OFF);
             it.filled_circle(190, 430, 12.5, COLOR_OFF);
             it.filled_circle(354, 430, 12.5, COLOR_OFF);
+            it.filled_circle(252, 417, 12.5, COLOR_OFF);
+            it.filled_circle(292, 417, 12.5, COLOR_OFF);
+            it.filled_circle(212, 424.5, 12.5, COLOR_OFF);
+            it.filled_circle(332, 424.5, 12.5, COLOR_OFF);
 
-            //Crescent
             if ((int)id(crescent).state % 2 == 1) {
               if (id(crescent).state >= 1) {
                 it.filled_circle(272, 417, 12.5);
@@ -346,6 +345,25 @@ display:
                 it.filled_circle(354, 430, 9.5, COLOR_OFF);
               }
             }
+
+            if ((int)id(crescent).state % 2 == 0) {
+              if (id(crescent).state >= 2) {
+                it.filled_circle(252, 417, 12.5);
+                it.filled_circle(292, 417, 12.5);
+                it.filled_circle(252, 417, 9.5, COLOR_OFF);
+                it.filled_circle(292, 417, 9.5, COLOR_OFF);
+              }
+              if (id(crescent).state >= 4) {
+                it.filled_circle(212, 424.5, 12.5);
+                it.filled_circle(332, 424.5, 12.5);
+                it.filled_circle(212, 424.5, 9.5, COLOR_OFF);
+                it.filled_circle(332, 424.5, 9.5, COLOR_OFF);
+              }
+            }
+
+
+
+
 
       - id: backgroundPage
         lambda: |-
@@ -400,14 +418,3 @@ display:
       #     it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
       #     it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
       #     it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
-
-# if ((int)id(crescent).state % 2 == 0) {
-#               if (id(crescent).state >= 2) {
-#                 it.filled_circle(261, 406, 5);
-#                 it.filled_circle(282, 406, 5);
-#               }
-#               if (id(crescent).state >= 4) {
-#                 it.filled_circle(240, 408, 5);
-#                 it.filled_circle(303, 408, 5);
-#               }
-#             }
