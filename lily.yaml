@@ -18,6 +18,12 @@ esphome:
   platform: ESP32
   board: esp32dev
 
+mqtt:
+  broker: 192.168.1.250
+  username: doorboardfront
+  password: bohthaaQu3aig3Queir0ne7jaezohgha
+
+
 wifi:
   ssid: ***REMOVED***
   password: ***REMOVED***
@@ -40,56 +46,67 @@ api:
   password: ***REMOVED***
 
 
+sun:
+  latitude: 40.7818°
+  longitude: -73.9175°
+
+
 deep_sleep:
   id: deep_sleep_control
   sleep_duration: ${sleep_time}
   touch_wakeup: true
 
-
-
-
-
 time:
   - platform: sntp
-  - platform: homeassistant
     id: ntp
   - platform: homeassistant
     on_time:
-      # Every 15 minutes
-      - seconds: 0
-        minutes: 0
-        hours: /4
-        then:
-          - component.update: battery
-  - platform: homeassistant
-    on_time:
-      - seconds: 0
-        minutes: 0
-        then:
-          - display.page.show: backgroundPage
-          - component.update: eInkDisplay
-  - platform: homeassistant
-    on_time:
-      - seconds: 10,40
-        then:
-          - component.update: eInkDisplay
-  - platform: homeassistant
-    on_time:
-      # Every 30 seconds
       - seconds: 0,30
+        minutes: 0-28,30-58
         then:
-          - if:
-              condition:
-                binary_sensor.is_on: prevent_deep_sleep
-              then:
-                - logger.log: 'Skipping sleep, per prevent_deep_sleep'
-                - deep_sleep.prevent: deep_sleep_control
-              else:
-                - deep_sleep.enter: deep_sleep_control
+          - script.execute: standard_update
+          - script.execute: consider_sleep
+      - seconds: 0,30
+        minutes: 29,59
+        then:
+          - script.execute: background_refresher
+          - delay: 5s
+          - script.execute: consider_sleep
 
-sun:
-  latitude: 40.7818°
-  longitude: -73.9175°
+
+
+script:
+  - id: refresh_display
+    then:
+      - display.page.show: black
+      - component.update: eInkDisplay
+      - display.page.show: blank
+      - component.update: eInkDisplay
+  - id: standard_update
+    then:
+      - display.page.show: standardRefresh
+      - component.update: eInkDisplay
+  - id: background_refresher
+    then:
+      - component.update: battery
+      - mqtt.publish:
+          topic: "battery/voltage"
+          payload: id(battery).voltage
+      - display.page.show: backgroundPage
+      - component.update: eInkDisplay
+      - delay: 5s
+      - display.page.show: standardRefresh
+      - component.update: eInkDisplay
+  - id: consider_sleep
+    then:
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+            - deep_sleep.prevent: deep_sleep_control
+          else:
+            - deep_sleep.enter: deep_sleep_control
 
 
 # Touch
@@ -122,6 +139,7 @@ sensor:
     update_interval: never
     voltage:
       name: "Battery Voltage"
+
 #Bikes
   - platform: homeassistant
     id: crescent
@@ -155,9 +173,6 @@ text_sensor:
     id: q69sA
     entity_id: sensor.q69s0
     internal: true
-    on_value:
-      then:
-        - display.page.show: busRefresh
     filters:
     - substitute:
       - "unavailable -> "
@@ -180,9 +195,6 @@ text_sensor:
     id: q69pA
     entity_id: sensor.q69p0
     internal: true
-    on_value:
-      then:
-        - display.page.show: busRefresh
     filters:
     - substitute:
       - "unavailable -> "
@@ -206,9 +218,6 @@ text_sensor:
     id: q100sA
     entity_id: sensor.q100s0
     internal: true
-    on_value:
-      then:
-        - display.page.show: busRefresh
     filters:
     - substitute:
       - "unavailable -> "
@@ -231,9 +240,6 @@ text_sensor:
     id: q100pA
     entity_id: sensor.q100p0
     internal: true
-    on_value:
-      then:
-        - display.page.show: busRefresh
     filters:
     - substitute:
       - "unavailable -> "
@@ -253,13 +259,8 @@ text_sensor:
       - "unavailable -> "
 
 
-script:
-  - id: refresh_display
-    then:
-      - display.page.show: black
-      - component.update: eInkDisplay
-      - display.page.show: blank
-      - component.update: eInkDisplay
+
+
 
 
 font:
@@ -290,8 +291,9 @@ display:
     update_interval: never
     rotation: 270
     pages:
-      - id: busRefresh
+      - id: standardRefresh
         lambda: |-
+          it.image(12, 8, id(background));
           // Steinway
           it.print(64, 17, id(ubuntu36), "Steinway");
           it.line(42, 61, 240, 61);
@@ -308,34 +310,22 @@ display:
           it.line(321, 107, 351, 107);
           it.print(368, 72, id(ubuntu40), "q69");
           it.line(452, 107, 482, 107);
-          it.line(321, 265, 351, 265);
+          it.line(321, 265, 336, 265);
           it.print(357, 232, id(ubuntu40), "q100");
-          it.line(452, 265, 482, 265);
+          it.line(467, 265, 482, 265);
 
           it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
           it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
           it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
           it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
-      - id: busBlank
-        lambda: |-
-          it.filled_rectangle(36, 137, 210, 65, COLOR_OFF);
-          it.filled_rectangle(281, 137, 210, 65, COLOR_OFF);
-          it.filled_rectangle(36, 296, 210, 65, COLOR_OFF);
-          it.filled_rectangle(281, 296, 210, 65, COLOR_OFF);
-          // Steinway
-          it.print(64, 17, id(ubuntu36), "Steinway");
-          it.print(102, 72, id(ubuntu40), "q69");
-          it.print(90, 232, id(ubuntu40), "q100");
 
-          // Plaza
-          it.print(359, 17, id(ubuntu36), "Plaza");
-          it.print(368, 72, id(ubuntu40), "q69");
-          it.print(357, 232, id(ubuntu40), "q100");
+          //Bikes
 
-          it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
-          it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
-          it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
-          it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
+          if (id(crescent).state <= 0) {
+           it.filled_circle(274, 500, 10);
+          }
+          else{}
+
 
       - id: backgroundPage
         lambda: |-
@@ -368,4 +358,26 @@ display:
       - id: blank
         lambda: |-
           it.filled_rectangle(0,0, 540, 960, COLOR_OFF);
+
+
+      # - id: busBlank
+      #   lambda: |-
+      #     it.filled_rectangle(36, 137, 210, 65, COLOR_OFF);
+      #     it.filled_rectangle(281, 137, 210, 65, COLOR_OFF);
+      #     it.filled_rectangle(36, 296, 210, 65, COLOR_OFF);
+      #     it.filled_rectangle(281, 296, 210, 65, COLOR_OFF);
+      #     // Steinway
+      #     it.print(64, 17, id(ubuntu36), "Steinway");
+      #     it.print(102, 72, id(ubuntu40), "q69");
+      #     it.print(90, 232, id(ubuntu40), "q100");
+
+      #     // Plaza
+      #     it.print(359, 17, id(ubuntu36), "Plaza");
+      #     it.print(368, 72, id(ubuntu40), "q69");
+      #     it.print(357, 232, id(ubuntu40), "q100");
+
+      #     it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
+      #     it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
+      #     it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
+      #     it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
 
