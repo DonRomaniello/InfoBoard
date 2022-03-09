@@ -10,7 +10,7 @@ substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
   run_time: 30s #can be as long as needed to get data
-  sleep_time: 270s # normal sleep time
+  sleep_time: 90s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
 esphome:
@@ -62,12 +62,12 @@ time:
   - platform: homeassistant
     on_time:
       - seconds: 0
-        minutes: 0-24,30-54
+        minutes: 0-57
         then:
           - script.execute: standard_update
           - script.execute: consider_sleep
       - seconds: 15
-        minutes: 25-29,55-59
+        minutes: 58-59
         then:
           - script.execute: background_refresher
           - delay: 5s
@@ -367,6 +367,7 @@ display:
               //Wipe
             it.filled_circle(504.8, 648.4, 12.5, COLOR_OFF);
             it.filled_circle(500.3, 608.1, 12.5, COLOR_OFF);
+            it.filled_circle(503.4, 688.6, 12.5, COLOR_OFF);
             it.filled_circle(489.9, 569, 12.5, COLOR_OFF);
             it.filled_circle(503.4, 729, 12.5, COLOR_OFF);
 
@@ -408,6 +409,100 @@ display:
                 it.filled_circle(503.4, 709, 9.5, COLOR_OFF);
               }
             }
+
+            // Cherry
+              //Wipe
+            it.filled_circle(39.2, 648.4, 12.5, COLOR_OFF);
+            it.filled_circle(43.7, 608.1, 12.5, COLOR_OFF);
+            it.filled_circle(39.6, 688.6, 12.5, COLOR_OFF);
+            it.filled_circle(54.1, 569, 12.5, COLOR_OFF);
+            it.filled_circle(40.6, 729, 12.5, COLOR_OFF);
+
+            it.filled_circle(41, 628.2, 12.5, COLOR_OFF);
+            it.filled_circle(39.6, 668.6, 12.5, COLOR_OFF);
+            it.filled_circle(48.1, 588.4, 12.5, COLOR_OFF);
+            it.filled_circle(40.6, 709, 12.5, COLOR_OFF);
+
+
+            if ((int)id(cherry).state % 2 == 1) {
+              if (id(cherry).state >= 1) {
+                it.filled_circle(39.2, 648.4, 12.5);
+                it.filled_circle(39.2, 648.4, 9.5, COLOR_OFF);
+              }
+              if (id(cherry).state >= 3) {
+                it.filled_circle(43.7, 608.1, 12.5);
+                it.filled_circle(39.6, 688.6, 12.5);
+                it.filled_circle(43.7, 608.1, 9.5, COLOR_OFF);
+                it.filled_circle(39.6, 688.6, 9.5, COLOR_OFF);
+              }
+              if (id(cherry).state >= 5) {
+                it.filled_circle(54.1, 569, 12.5);
+                it.filled_circle(40.6, 729, 12.5);
+                it.filled_circle(54.1, 569, 9.5, COLOR_OFF);
+                it.filled_circle(40.6, 729, 9.5, COLOR_OFF);
+              }
+            }
+            if ((int)id(cherry).state % 2 == 0) {
+              if (id(cherry).state >= 2) {
+                it.filled_circle(41, 628.2, 12.5);
+                it.filled_circle(39.6, 668.6, 12.5);
+                it.filled_circle(41, 628.2, 9.5, COLOR_OFF);
+                it.filled_circle(39.6, 668.6, 9.5, COLOR_OFF);
+              }
+              if (id(cherry).state >= 4) {
+                it.filled_circle(48.1, 588.4, 12.5);
+                it.filled_circle(40.6, 709, 12.5);
+                it.filled_circle(48.1, 588.4, 9.5, COLOR_OFF);
+                it.filled_circle(40.6, 709, 9.5, COLOR_OFF);
+              }
+            }
+
+            // Shore
+              //Wipe
+            it.filled_circle(272, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(231.6, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(312.4, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(191.2, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(352.8, 923.9, 12.5, COLOR_OFF);
+
+            it.filled_circle(251.8, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(292.2, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(211.4, 923.9, 12.5, COLOR_OFF);
+            it.filled_circle(332.6, 923.9, 12.5, COLOR_OFF);
+
+            if ((int)id(shore).state % 2 == 1) {
+              if (id(shore).state >= 1) {
+                it.filled_circle(272, 923.9, 12.5);
+                it.filled_circle(272, 923.9, 9.5, COLOR_OFF);
+              }
+              if (id(shore).state >= 3) {
+                it.filled_circle(231.6, 923.9, 12.5);
+                it.filled_circle(312.4, 923.9, 12.5);
+                it.filled_circle(231.6, 923.9, 9.5, COLOR_OFF);
+                it.filled_circle(312.4, 923.9, 9.5, COLOR_OFF);
+              }
+              if (id(shore).state >= 5) {
+                it.filled_circle(191.2, 923.9, 12.5);
+                it.filled_circle(352.8, 923.9, 12.5);
+                it.filled_circle(191.2, 923.9, 9.5, COLOR_OFF);
+                it.filled_circle(352.8, 923.9, 9.5, COLOR_OFF);
+              }
+            }
+            if ((int)id(shore).state % 2 == 0) {
+              if (id(shore).state >= 2) {
+                it.filled_circle(251.8, 923.9, 12.5);
+                it.filled_circle(292.2, 923.9, 12.5);
+                it.filled_circle(251.8, 923.9, 9.5, COLOR_OFF);
+                it.filled_circle(292.2, 923.9, 9.5, COLOR_OFF);
+              }
+              if (id(shore).state >= 4) {
+                it.filled_circle(211.4, 923.9, 12.5);
+                it.filled_circle(332.6, 923.9, 12.5);
+                it.filled_circle(211.4, 923.9, 9.5, COLOR_OFF);
+                it.filled_circle(332.6, 923.9, 9.5, COLOR_OFF);
+              }
+            }
+
 
 
 
