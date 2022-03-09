@@ -10,7 +10,7 @@ substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
   run_time: 30s #can be as long as needed to get data
-  sleep_time: 30s # normal sleep time
+  sleep_time: 270s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
 esphome:
@@ -319,50 +319,95 @@ display:
 
             //Crescent
               //Wipe
-            it.filled_circle(272, 417, 12.5, COLOR_OFF);
-            it.filled_circle(231, 420, 12.5, COLOR_OFF);
-            it.filled_circle(313, 420, 12.5, COLOR_OFF);
-            it.filled_circle(190, 430, 12.5, COLOR_OFF);
-            it.filled_circle(354, 430, 12.5, COLOR_OFF);
-            it.filled_circle(252, 417, 12.5, COLOR_OFF);
-            it.filled_circle(292, 417, 12.5, COLOR_OFF);
-            it.filled_circle(212, 424.5, 12.5, COLOR_OFF);
-            it.filled_circle(332, 424.5, 12.5, COLOR_OFF);
+            it.filled_circle(272, 416.5, 12.5, COLOR_OFF);
+            it.filled_circle(231.7, 420, 12.5, COLOR_OFF);
+            it.filled_circle(312.3, 420, 12.5, COLOR_OFF);
+            it.filled_circle(192.7, 430.5, 12.5, COLOR_OFF);
+            it.filled_circle(351.3, 430.5, 12.5, COLOR_OFF);
+
+            it.filled_circle(251.8, 417.4, 12.5, COLOR_OFF);
+            it.filled_circle(292.2, 417.4, 12.5, COLOR_OFF);
+            it.filled_circle(212, 424.4, 12.5, COLOR_OFF);
+            it.filled_circle(332, 424.4, 12.5, COLOR_OFF);
 
             if ((int)id(crescent).state % 2 == 1) {
               if (id(crescent).state >= 1) {
-                it.filled_circle(272, 417, 12.5);
-                it.filled_circle(272, 417, 9.5, COLOR_OFF);
+                it.filled_circle(272, 416.5, 12.5);
+                it.filled_circle(272, 416.5, 9.5, COLOR_OFF);
               }
               if (id(crescent).state >= 3) {
-                it.filled_circle(231, 420, 12.5);
-                it.filled_circle(313, 420, 12.5);
-                it.filled_circle(231, 420, 9.5, COLOR_OFF);
-                it.filled_circle(313, 420, 9.5, COLOR_OFF);
+                it.filled_circle(231.7, 420, 12.5);
+                it.filled_circle(312.3, 420, 12.5);
+                it.filled_circle(231.7, 420, 9.5, COLOR_OFF);
+                it.filled_circle(312.3, 420, 9.5, COLOR_OFF);
               }
               if (id(crescent).state >= 5) {
-                it.filled_circle(190, 430, 12.5);
-                it.filled_circle(354, 430, 12.5);
-                it.filled_circle(190, 430, 9.5, COLOR_OFF);
-                it.filled_circle(354, 430, 9.5, COLOR_OFF);
+                it.filled_circle(192.7, 430.5, 12.5);
+                it.filled_circle(351.3, 430.5, 12.5);
+                it.filled_circle(192.7, 430.5, 9.5, COLOR_OFF);
+                it.filled_circle(351.3, 430.5, 9.5, COLOR_OFF);
               }
             }
-
             if ((int)id(crescent).state % 2 == 0) {
               if (id(crescent).state >= 2) {
-                it.filled_circle(252, 417, 12.5);
-                it.filled_circle(292, 417, 12.5);
-                it.filled_circle(252, 417, 9.5, COLOR_OFF);
-                it.filled_circle(292, 417, 9.5, COLOR_OFF);
+                it.filled_circle(251.8, 417.4, 12.5);
+                it.filled_circle(292.2, 417.4, 12.5);
+                it.filled_circle(251.8, 417.4, 9.5, COLOR_OFF);
+                it.filled_circle(292.2, 417.4, 9.5, COLOR_OFF);
               }
               if (id(crescent).state >= 4) {
-                it.filled_circle(212, 424.5, 12.5);
-                it.filled_circle(332, 424.5, 12.5);
-                it.filled_circle(212, 424.5, 9.5, COLOR_OFF);
-                it.filled_circle(332, 424.5, 9.5, COLOR_OFF);
+                it.filled_circle(212, 424.4, 12.5);
+                it.filled_circle(332, 424.4, 12.5);
+                it.filled_circle(212, 424.4, 9.5, COLOR_OFF);
+                it.filled_circle(332, 424.4, 9.5, COLOR_OFF);
               }
             }
 
+            // Parkside
+              //Wipe
+            it.filled_circle(504.8, 648.4, 12.5, COLOR_OFF);
+            it.filled_circle(500.3, 608.1, 12.5, COLOR_OFF);
+            it.filled_circle(489.9, 569, 12.5, COLOR_OFF);
+            it.filled_circle(503.4, 729, 12.5, COLOR_OFF);
+
+            it.filled_circle(503, 628.2, 12.5, COLOR_OFF);
+            it.filled_circle(503.4, 668.6, 12.5, COLOR_OFF);
+            it.filled_circle(495.9, 588.4, 12.5, COLOR_OFF);
+            it.filled_circle(503.4, 709, 12.5, COLOR_OFF);
+
+
+            if ((int)id(parkside).state % 2 == 1) {
+              if (id(parkside).state >= 1) {
+                it.filled_circle(504.8, 648.4, 12.5);
+                it.filled_circle(504.8, 648.4, 9.5, COLOR_OFF);
+              }
+              if (id(parkside).state >= 3) {
+                it.filled_circle(500.3, 608.1, 12.5);
+                it.filled_circle(503.4, 688.6, 12.5);
+                it.filled_circle(500.3, 608.1, 9.5, COLOR_OFF);
+                it.filled_circle(503.4, 688.6, 9.5, COLOR_OFF);
+              }
+              if (id(parkside).state >= 5) {
+                it.filled_circle(489.9, 569, 12.5);
+                it.filled_circle(503.4, 729, 12.5);
+                it.filled_circle(489.9, 569, 9.5, COLOR_OFF);
+                it.filled_circle(503.4, 729, 9.5, COLOR_OFF);
+              }
+            }
+            if ((int)id(parkside).state % 2 == 0) {
+              if (id(parkside).state >= 2) {
+                it.filled_circle(503, 628.2, 12.5);
+                it.filled_circle(503.4, 668.6, 12.5);
+                it.filled_circle(503, 628.2, 9.5, COLOR_OFF);
+                it.filled_circle(503.4, 668.6, 9.5, COLOR_OFF);
+              }
+              if (id(parkside).state >= 4) {
+                it.filled_circle(495.9, 588.4, 12.5);
+                it.filled_circle(503.4, 709, 12.5);
+                it.filled_circle(495.9, 588.4, 9.5, COLOR_OFF);
+                it.filled_circle(503.4, 709, 9.5, COLOR_OFF);
+              }
+            }
 
 
 
