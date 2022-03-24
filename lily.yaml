@@ -1,3 +1,10 @@
+# Use a global variable to indicate whether to do a full refresh or not.
+# When running standard script, test if full refresh. If true, full refresh
+# and toggle variable. Every X hours, turn Global to true.
+
+
+
+
 external_components:
   - source:
       type: git
@@ -9,8 +16,8 @@ external_components:
 substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
-  run_time: 30s #can be as long as needed to get data
-  sleep_time: 90s # normal sleep time
+  run_time: 15s #can be as long as needed to get data
+  sleep_time: 105s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
 esphome:
@@ -61,36 +68,23 @@ time:
     id: ntp
   - platform: homeassistant
     on_time:
-      - seconds: 0
-        minutes: 0-57
+      - seconds: /10
         then:
           - script.execute: standard_update
           - script.execute: consider_sleep
-      - seconds: 15
-        minutes: 58-59
+  - platform: sntp
+    on_time:
+      - seconds: 0
+        minutes: /30
         then:
-          - script.execute: background_refresher
-          - delay: 5s
-          - script.execute: consider_sleep
+          - component.update: battery
 
 
 
 script:
-  - id: refresh_display
-    then:
-      - display.page.show: black
-      - component.update: eInkDisplay
-      - display.page.show: blank
-      - component.update: eInkDisplay
   - id: standard_update
     then:
       - component.update: battery
-      - display.page.show: standardRefresh
-      - component.update: eInkDisplay
-  - id: background_refresher
-    then:
-      - display.page.show: backgroundPage
-      - component.update: eInkDisplay
       - display.page.show: standardRefresh
       - component.update: eInkDisplay
   - id: consider_sleep
@@ -102,6 +96,8 @@ script:
             - logger.log: 'Skipping sleep, per prevent_deep_sleep'
             - deep_sleep.prevent: deep_sleep_control
           else:
+            - lambda: |-
+                id(deep_sleep_control).set_sleep_duration(id(sleeptime).state * 1000);
             - deep_sleep.enter: deep_sleep_control
 
 
@@ -123,7 +119,6 @@ binary_sensor:
     internal: true
     on_press:
       then:
-       - script.execute: refresh_display
   - platform: homeassistant
     id: prevent_deep_sleep
     name: Prevent Deep Sleep
@@ -135,6 +130,10 @@ sensor:
     update_interval: never
     voltage:
       name: "Battery Voltage"
+  - platform: mqtt_subscribe
+    name: "SleepTime"
+    id: sleeptime
+    topic: sleepFor
 
 #Bikes
   - platform: homeassistant
@@ -153,12 +152,13 @@ sensor:
     id: cherry
     entity_id: sensor.cherrybikes
     internal: true
-#Sun
-  - platform: sun
-    name: Sun Elevation
-    type: elevation
-    id: sunElevation
-    internal: true
+
+# #Sun
+#   - platform: sun
+#     name: Sun Elevation
+#     type: elevation
+#     id: sunElevation
+#     internal: true
 
 
 text_sensor:
@@ -256,9 +256,6 @@ text_sensor:
 
 
 
-
-
-
 font:
   - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Regular.ttf"
     id: ubuntu36
@@ -273,11 +270,6 @@ font:
     id: ubuntu88
     size: 88
 
-image:
-  - file: "./images/lilyLayoutScaledBackground.png"
-    id: background
-    dither: FLOYDSTEINBERG
-
 # Display is not centered.
 # Shift everything right by 4 px, giving 536 width
 display:
@@ -289,46 +281,68 @@ display:
     pages:
       - id: standardRefresh
         lambda: |-
-          it.image(12, 8, id(background));
+          //it.image(12, 8, id(background));
+
+          // Drawn background
+          it.filled_rectangle(13, 11.5, 256.2, 579.2);
+          it.filled_rectangle(17, 15.5, 248.2, 571.2, COLOR_OFF);
+          it.filled_rectangle(275.6, 11.5, 256.2, 579.2);
+          it.filled_rectangle(279.6, 15.5, 248.2, 571.2, COLOR_OFF);
+
+
+          it.filled_circle(272, 650.2, 268);
+          it.filled_circle(272, 650.2, 264, COLOR_OFF);
+          it.filled_circle(272, 650.2, 260);
+
+          it.filled_rectangle(12, 650.2, 520, 298.3);
+          it.filled_rectangle(16, 650.2, 512, 294.3, COLOR_OFF);
+
+          it.filled_circle(272, 650.2, 256, COLOR_OFF);
+
+
+
+
+
+
           // Steinway
-          it.print(64, 17, id(ubuntu36), "Steinway");
-          it.line(42, 61, 240, 61);
-          it.line(63, 107, 92, 107);
-          it.print(102, 72, id(ubuntu40), "q69");
-          it.line(189, 107, 218, 107);
-          it.line(63, 265, 78, 265);
-          it.print(90, 232, id(ubuntu40), "q100");
-          it.line(200, 265, 215, 265);
+          it.print(64, 20.8, id(ubuntu36), "Steinway");
+          it.line(42, 65.8, 240, 65.8);
+          it.line(63, 109.5, 92, 109.5);
+          it.print(102, 75.8, id(ubuntu40), "q69");
+          it.line(189, 109.5, 218, 109.5);
+          it.line(63, 267, 78, 267);
+          it.print(90, 233.4, id(ubuntu40), "q100");
+          it.line(200, 267, 215, 267);
 
           // Plaza
-          it.print(359, 17, id(ubuntu36), "Plaza");
-          it.line(304, 61, 502, 61);
-          it.line(321, 107, 351, 107);
-          it.print(368, 72, id(ubuntu40), "q69");
-          it.line(452, 107, 482, 107);
-          it.line(321, 265, 336, 265);
-          it.print(357, 232, id(ubuntu40), "q100");
-          it.line(467, 265, 482, 265);
+          it.print(359, 20.8, id(ubuntu36), "Plaza");
+          it.line(304, 65.8, 502, 65.8);
+          it.line(321, 109.5, 351, 109.5);
+          it.print(368, 75.8, id(ubuntu40), "q69");
+          it.line(452, 109.5, 482, 109.5);
+          it.line(321, 267, 336, 267);
+          it.print(357, 233.4, id(ubuntu40), "q100");
+          it.line(467, 267, 482, 267);
 
-          it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
-          it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
-          it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
-          it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
+          it.printf(26, 122.5, id(ubuntu88), "%s", id(q69sA).state.c_str());
+          it.printf(289, 122.5, id(ubuntu88), "%s", id(q69pA).state.c_str());
+          it.printf(26, 280, id(ubuntu88), "%s", id(q100sA).state.c_str());
+          it.printf(289, 280, id(ubuntu88), "%s", id(q100pA).state.c_str());
 
 
 
             //Crescent
               //Wipe
             it.filled_circle(272, 416.5, 12.5, COLOR_OFF);
-            it.filled_circle(231.7, 420, 12.5, COLOR_OFF);
-            it.filled_circle(312.3, 420, 12.5, COLOR_OFF);
-            it.filled_circle(192.7, 430.5, 12.5, COLOR_OFF);
-            it.filled_circle(351.3, 430.5, 12.5, COLOR_OFF);
+            it.filled_circle(231.4, 420.1, 12.5, COLOR_OFF);
+            it.filled_circle(312.6, 420.1, 12.5, COLOR_OFF);
+            it.filled_circle(192.1, 430.6, 12.5, COLOR_OFF);
+            it.filled_circle(351.0, 430.6, 12.5, COLOR_OFF);
 
-            it.filled_circle(251.8, 417.4, 12.5, COLOR_OFF);
-            it.filled_circle(292.2, 417.4, 12.5, COLOR_OFF);
-            it.filled_circle(212, 424.4, 12.5, COLOR_OFF);
-            it.filled_circle(332, 424.4, 12.5, COLOR_OFF);
+            it.filled_circle(251.6, 417.4, 12.5, COLOR_OFF);
+            it.filled_circle(292.4, 417.4, 12.5, COLOR_OFF);
+            it.filled_circle(211.5, 424.5, 12.5, COLOR_OFF);
+            it.filled_circle(332, 424.5, 12.5, COLOR_OFF);
 
             if ((int)id(crescent).state % 2 == 1) {
               if (id(crescent).state >= 1) {
@@ -336,126 +350,141 @@ display:
                 it.filled_circle(272, 416.5, 9.5, COLOR_OFF);
               }
               if (id(crescent).state >= 3) {
-                it.filled_circle(231.7, 420, 12.5);
-                it.filled_circle(312.3, 420, 12.5);
-                it.filled_circle(231.7, 420, 9.5, COLOR_OFF);
-                it.filled_circle(312.3, 420, 9.5, COLOR_OFF);
+                it.filled_circle(231.4, 420.1, 12.5);
+                it.filled_circle(312.6, 420.1, 12.5);
+                it.filled_circle(231.4, 420.1, 9.5, COLOR_OFF);
+                it.filled_circle(312.6, 420.1, 9.5, COLOR_OFF);
               }
               if (id(crescent).state >= 5) {
-                it.filled_circle(192.7, 430.5, 12.5);
-                it.filled_circle(351.3, 430.5, 12.5);
-                it.filled_circle(192.7, 430.5, 9.5, COLOR_OFF);
-                it.filled_circle(351.3, 430.5, 9.5, COLOR_OFF);
+                it.filled_circle(192.1, 430.6, 12.5);
+                it.filled_circle(351.9, 430.6, 12.5);
+                it.filled_circle(192.1, 430.6, 9.5, COLOR_OFF);
+                it.filled_circle(351.9, 430.6, 9.5, COLOR_OFF);
               }
             }
             if ((int)id(crescent).state % 2 == 0) {
               if (id(crescent).state >= 2) {
-                it.filled_circle(251.8, 417.4, 12.5);
-                it.filled_circle(292.2, 417.4, 12.5);
-                it.filled_circle(251.8, 417.4, 9.5, COLOR_OFF);
-                it.filled_circle(292.2, 417.4, 9.5, COLOR_OFF);
+                it.filled_circle(251.6, 417.4, 12.5);
+                it.filled_circle(292.4, 417.4, 12.5);
+                it.filled_circle(251.6, 417.4, 9.5, COLOR_OFF);
+                it.filled_circle(292.4, 417.4, 9.5, COLOR_OFF);
               }
               if (id(crescent).state >= 4) {
-                it.filled_circle(212, 424.4, 12.5);
-                it.filled_circle(332, 424.4, 12.5);
-                it.filled_circle(212, 424.4, 9.5, COLOR_OFF);
-                it.filled_circle(332, 424.4, 9.5, COLOR_OFF);
+                it.filled_circle(211.5, 424.5, 12.5);
+                it.filled_circle(332, 424.5, 12.5);
+                it.filled_circle(212, 424.5, 9.5, COLOR_OFF);
+                it.filled_circle(332.5, 424.5, 9.5, COLOR_OFF);
               }
             }
 
             // Parkside
               //Wipe
-            it.filled_circle(504.8, 648.4, 12.5, COLOR_OFF);
-            it.filled_circle(500.3, 608.1, 12.5, COLOR_OFF);
-            it.filled_circle(503.4, 688.6, 12.5, COLOR_OFF);
-            it.filled_circle(489.9, 569, 12.5, COLOR_OFF);
-            it.filled_circle(503.4, 729, 12.5, COLOR_OFF);
+            it.filled_circle(505.6, 650.2, 12.5, COLOR_OFF);
+            it.filled_circle(502.1, 609.6, 12.5, COLOR_OFF);
+            it.filled_circle(505.6, 690.7, 12.5, COLOR_OFF);
+            it.filled_circle(491.5, 570.3, 12.5, COLOR_OFF);
+            it.filled_circle(505.6, 730.1, 12.5, COLOR_OFF);
 
-            it.filled_circle(503, 628.2, 12.5, COLOR_OFF);
-            it.filled_circle(503.4, 668.6, 12.5, COLOR_OFF);
-            it.filled_circle(495.9, 588.4, 12.5, COLOR_OFF);
-            it.filled_circle(503.4, 709, 12.5, COLOR_OFF);
-
+            it.filled_circle(504.7, 629.8, 12.5, COLOR_OFF);
+            it.filled_circle(505.6, 670.5, 12.5, COLOR_OFF);
+            it.filled_circle(497.6, 589.7, 12.5, COLOR_OFF);
+            it.filled_circle(505.6, 710.6, 12.5, COLOR_OFF);
 
             if ((int)id(parkside).state % 2 == 1) {
               if (id(parkside).state >= 1) {
-                it.filled_circle(504.8, 648.4, 12.5);
-                it.filled_circle(504.8, 648.4, 9.5, COLOR_OFF);
+                it.filled_circle(505.6, 650.2, 12.5);
+                it.filled_circle(505.6, 650.2, 9.5, COLOR_OFF);
               }
               if (id(parkside).state >= 3) {
-                it.filled_circle(500.3, 608.1, 12.5);
-                it.filled_circle(503.4, 688.6, 12.5);
-                it.filled_circle(500.3, 608.1, 9.5, COLOR_OFF);
-                it.filled_circle(503.4, 688.6, 9.5, COLOR_OFF);
+                it.filled_circle(502.1, 609.6, 12.5);
+                it.filled_circle(502.1, 609.6, 9.5, COLOR_OFF);
+                it.filled_circle(504.6, 690.7, 12.5);
+                it.filled_circle(504.6, 690.7, 9.5, COLOR_OFF);
               }
               if (id(parkside).state >= 5) {
-                it.filled_circle(489.9, 569, 12.5);
-                it.filled_circle(503.4, 729, 12.5);
-                it.filled_circle(489.9, 569, 9.5, COLOR_OFF);
-                it.filled_circle(503.4, 729, 9.5, COLOR_OFF);
+                it.filled_circle(491.5, 570.3, 12.5);
+                it.filled_circle(491.5, 570.3, 9.5, COLOR_OFF);
+                it.filled_circle(505.6, 730.1, 12.5);
+                it.filled_circle(505.6, 730.1, 9.5, COLOR_OFF);
               }
             }
             if ((int)id(parkside).state % 2 == 0) {
               if (id(parkside).state >= 2) {
-                it.filled_circle(503, 628.2, 12.5);
-                it.filled_circle(503.4, 668.6, 12.5);
-                it.filled_circle(503, 628.2, 9.5, COLOR_OFF);
-                it.filled_circle(503.4, 668.6, 9.5, COLOR_OFF);
+                it.filled_circle(504.7, 629.8, 12.5);
+                it.filled_circle(504.7, 629.8, 9.5, COLOR_OFF);
+                it.filled_circle(505.6, 670.5, 12.5);
+                it.filled_circle(505.6, 670.5, 9.5, COLOR_OFF);
+
               }
               if (id(parkside).state >= 4) {
-                it.filled_circle(495.9, 588.4, 12.5);
-                it.filled_circle(503.4, 709, 12.5);
-                it.filled_circle(495.9, 588.4, 9.5, COLOR_OFF);
-                it.filled_circle(503.4, 709, 9.5, COLOR_OFF);
+                it.filled_circle(497.6, 589.7, 12.5);
+                it.filled_circle(497.6, 589.7, 9.5, COLOR_OFF);
+
+                it.filled_circle(505.6, 710.6, 12.5);
+                it.filled_circle(505.6, 710.6, 9.5, COLOR_OFF);
+
               }
             }
 
             // Cherry
               //Wipe
-            it.filled_circle(39.2, 648.4, 12.5, COLOR_OFF);
-            it.filled_circle(43.7, 608.1, 12.5, COLOR_OFF);
-            it.filled_circle(39.6, 688.6, 12.5, COLOR_OFF);
-            it.filled_circle(54.1, 569, 12.5, COLOR_OFF);
-            it.filled_circle(40.6, 729, 12.5, COLOR_OFF);
+              it.filled_circle(39.4, 650.2, 12.5, COLOR_OFF);
+              it.filled_circle(41.9, 609.6, 12.5, COLOR_OFF);
+              it.filled_circle(39.4, 690.7, 12.5, COLOR_OFF);
+              it.filled_circle(52.5, 570.3, 12.5, COLOR_OFF);
+              it.filled_circle(39.4, 730.1, 12.5, COLOR_OFF);
 
-            it.filled_circle(41, 628.2, 12.5, COLOR_OFF);
-            it.filled_circle(39.6, 668.6, 12.5, COLOR_OFF);
-            it.filled_circle(48.1, 588.4, 12.5, COLOR_OFF);
-            it.filled_circle(40.6, 709, 12.5, COLOR_OFF);
-
+              it.filled_circle(39.3, 629.8, 12.5, COLOR_OFF);
+              it.filled_circle(39.4, 670.5, 12.5, COLOR_OFF);
+              it.filled_circle(46.4, 589.7, 12.5, COLOR_OFF);
+              it.filled_circle(38.4, 710.6, 12.5, COLOR_OFF);
 
             if ((int)id(cherry).state % 2 == 1) {
               if (id(cherry).state >= 1) {
-                it.filled_circle(39.2, 648.4, 12.5);
-                it.filled_circle(39.2, 648.4, 9.5, COLOR_OFF);
+                it.filled_circle(39.4, 650.2, 12.5);
+                it.filled_circle(39.4, 650.2, 9.5, COLOR_OFF);
               }
               if (id(cherry).state >= 3) {
-                it.filled_circle(43.7, 608.1, 12.5);
-                it.filled_circle(39.6, 688.6, 12.5);
-                it.filled_circle(43.7, 608.1, 9.5, COLOR_OFF);
-                it.filled_circle(39.6, 688.6, 9.5, COLOR_OFF);
+                it.filled_circle(41.9, 609.6, 12.5);
+                it.filled_circle(41.9, 609.6, 9.5, COLOR_OFF);
+
+                it.filled_circle(39.4, 690.7, 12.5);
+                it.filled_circle(39.4, 690.7, 9.5, COLOR_OFF);
               }
               if (id(cherry).state >= 5) {
-                it.filled_circle(54.1, 569, 12.5);
-                it.filled_circle(40.6, 729, 12.5);
-                it.filled_circle(54.1, 569, 9.5, COLOR_OFF);
-                it.filled_circle(40.6, 729, 9.5, COLOR_OFF);
+                it.filled_circle(52.5, 570.3, 12.5);
+                it.filled_circle(52.5, 570.3, 9.5, COLOR_OFF);
+
+                it.filled_circle(39.4, 730.1, 12.5);
+                it.filled_circle(39.4, 730.1, 9.5, COLOR_OFF);
               }
             }
             if ((int)id(cherry).state % 2 == 0) {
               if (id(cherry).state >= 2) {
-                it.filled_circle(41, 628.2, 12.5);
-                it.filled_circle(39.6, 668.6, 12.5);
-                it.filled_circle(41, 628.2, 9.5, COLOR_OFF);
-                it.filled_circle(39.6, 668.6, 9.5, COLOR_OFF);
+                it.filled_circle(39.3, 629.8, 12.5);
+                it.filled_circle(39.3, 629.8, 9.5, COLOR_OFF);
+
+                it.filled_circle(39.4, 670.5, 12.5);
+                it.filled_circle(39.4, 670.5, 9.5, COLOR_OFF);
               }
               if (id(cherry).state >= 4) {
-                it.filled_circle(48.1, 588.4, 12.5);
-                it.filled_circle(40.6, 709, 12.5);
-                it.filled_circle(48.1, 588.4, 9.5, COLOR_OFF);
-                it.filled_circle(40.6, 709, 9.5, COLOR_OFF);
+                it.filled_circle(46.4, 589.7, 12.5);
+                it.filled_circle(46.4, 589.7, 9.5, COLOR_OFF);
+
+                it.filled_circle(38.4, 710.6, 12.5);
+                it.filled_circle(38.4, 710.6, 9.5, COLOR_OFF);
               }
             }
+
+
+            // LIMIT FOR NOW
+
+
+
+
+
+
+
 
             // Shore
               //Wipe
@@ -503,61 +532,5 @@ display:
               }
             }
 
-
-
-
-      - id: backgroundPage
-        lambda: |-
-          it.image(12, 8, id(background));
-
-          // Steinway
-          it.print(64, 17, id(ubuntu36), "Steinway");
-          it.line(42, 61, 240, 61);
-          it.line(63, 107, 92, 107);
-          it.print(102, 72, id(ubuntu40), "q69");
-          it.line(189, 107, 218, 107);
-          it.line(63, 265, 78, 265);
-          it.print(90, 232, id(ubuntu40), "q100");
-          it.line(200, 265, 215, 265);
-
-          // Plaza
-          it.print(359, 17, id(ubuntu36), "Plaza");
-          it.line(304, 61, 502, 61);
-          it.line(321, 107, 351, 107);
-          it.print(368, 72, id(ubuntu40), "q69");
-          it.line(452, 107, 482, 107);
-          it.line(321, 265, 351, 265);
-          it.print(357, 232, id(ubuntu40), "q100");
-          it.line(452, 265, 482, 265);
-
-      - id: black
-        lambda: |-
-          it.filled_rectangle(0,0, 540, 960);
-
-      - id: blank
-        lambda: |-
-          it.filled_rectangle(0,0, 540, 960, COLOR_OFF);
-
-
-      # - id: busBlank
-      #   lambda: |-
-      #     it.filled_rectangle(36, 137, 210, 65, COLOR_OFF);
-      #     it.filled_rectangle(281, 137, 210, 65, COLOR_OFF);
-      #     it.filled_rectangle(36, 296, 210, 65, COLOR_OFF);
-      #     it.filled_rectangle(281, 296, 210, 65, COLOR_OFF);
-      #     // Steinway
-      #     it.print(64, 17, id(ubuntu36), "Steinway");
-      #     it.print(102, 72, id(ubuntu40), "q69");
-      #     it.print(90, 232, id(ubuntu40), "q100");
-
-      #     // Plaza
-      #     it.print(359, 17, id(ubuntu36), "Plaza");
-      #     it.print(368, 72, id(ubuntu40), "q69");
-      #     it.print(357, 232, id(ubuntu40), "q100");
-
-      #     it.printf(26, 124, id(ubuntu88), "%s", id(q69sA).state.c_str());
-      #     it.printf(291, 124, id(ubuntu88), "%s", id(q69pA).state.c_str());
-      #     it.printf(26, 283, id(ubuntu88), "%s", id(q100sA).state.c_str());
-      #     it.printf(291, 283, id(ubuntu88), "%s", id(q100pA).state.c_str());
 
 
