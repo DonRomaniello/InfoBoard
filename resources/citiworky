@@ -1,0 +1,29 @@
+- authentication: digest
+  scan_interval: 60
+  resource: https://gbfs.citibikenyc.com/gbfs/en/station_status.json
+  sensor:
+    - name: "ParksideDeli"
+      json_attributes_path: "$.data.stations[?(@.station_id == '3532')]"
+      value_template: '{{value_json.num_bikes_available}}'
+      json_attributes:
+          - "num_bikes_available"
+    - name: "21stShore"
+      json_attributes_path: "$.data.stations[?(@.station_id == '4275')]"
+      value_template: '{{value_json.num_bikes_available}}'
+      json_attributes:
+          - "num_bikes_available"
+    - name: "CherryValley"
+      json_attributes_path: "$.data.stations[?(@.station_id == '4327')]"
+      value_template: '{{value_json.num_bikes_available}}'
+      json_attributes:
+          - "num_bikes_available"
+    - name: "Crescent"
+      json_attributes_path: "$.data.stations[?(@.station_id == '3530')]"
+      value_template: '{{value_json.num_bikes_available}}'
+      json_attributes:
+          - "num_bikes_available"
+
+
+
+
+

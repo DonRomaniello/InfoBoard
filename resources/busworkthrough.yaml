@@ -1,0 +1,10 @@
+- authentication: digest
+  scan_interval: 60
+  resource: 
+  sensor:
+    - name: "Next Q69"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"
+      value_template: "OK"
+      json_attributes:
+        - ExpectedArrivalTime
+    

@@ -1,0 +1,58 @@
+- platform: rest
+  name: Q69
+  json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit"
+  json_attributes:
+    - MonitoredStopVisit
+  value_template: '{{ value_json }}''
+  resource: https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=553077
+- platform: template
+  sensors:
+    next:
+      value_template: "{{ state_attr('sensor.Q69', 'MonitoredStopVisit')[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime }}"
+      entity_id: sensor.Q69
+
+
+
+- authentication: digest
+    username: "admin"
+    password: "password"
+    scan_interval: 60
+    resource: http://192.168.1.12/status.xml
+    sensor:
+      - name: "Adult Pool Data System"
+        json_attributes_path: "$.response.system"
+        value_template: "OK"
+        json_attributes:
+          - "runstate"
+          - "model"
+          - "opmode"
+          - "freeze"
+          - "time"
+          - "sensor1"
+          - "sensor2"
+          - "sensor3"
+          - "sensor4"
+          - "sensor5"
+          - "version"
+      - name: "Adult Pool Data Equipment"
+        json_attributes_path: "$.response.equipment"
+        value_template: "OK"
+        json_attributes:
+          - "circuit1"
+          - "circuit2"
+          - "circuit3"
+          - "circuit4"
+          - "circuit5"
+          - "circuit6"
+          - "circuit7"
+          - "circuit8"
+      - name: "Adult Pool Data Temp"
+        json_attributes_path: "$.response.temp"
+        value_template: "OK"
+        json_attributes:
+          - "htstatus"
+          - "poolsp"
+          - "spasp"
+          - "pooltemp"
+          - "spatemp"
+          - "airtemp"

@@ -2,9 +2,6 @@
 # When running standard script, test if full refresh. If true, full refresh
 # and toggle variable. Every X hours, turn Global to true.
 
-
-
-
 external_components:
   - source:
       type: git
@@ -17,7 +14,6 @@ substitutions:
   esp_name: ESP Display #Device Name
   esp_hostname: esp-display
   run_time: 15s #can be as long as needed to get data
-  sleep_time: 105s # normal sleep time
   night_sleep_time: 6h # 1st sleep time after midnight
 
 esphome:
@@ -27,13 +23,13 @@ esphome:
 
 mqtt:
   broker: 192.168.1.250
-  username: doorboardfront
-  password: bohthaaQu3aig3Queir0ne7jaezohgha
+  username: !secret mqtt_name
+  password: !secret mqtt_pw
 
 
 wifi:
-  ssid: ***REMOVED***
-  password: ***REMOVED***
+  ssid: !secret wifi_ssid
+  password: !secret wifi_pw
   manual_ip:
     static_ip: 192.168.1.49
     gateway: 192.168.1.1
@@ -42,15 +38,15 @@ wifi:
   power_save_mode: HIGH
 
 ota:
-  password: ***REMOVED***
+  password: !secret ota_pw
   id: ota_id
 
 
-# logger:
-#   level: debug
+logger:
+  level: debug
 
 api:
-  password: ***REMOVED***
+  password: !secret api_pw
 
 
 sun:
@@ -60,7 +56,6 @@ sun:
 
 deep_sleep:
   id: deep_sleep_control
-  sleep_duration: ${sleep_time}
   touch_wakeup: true
 
 time:
@@ -292,16 +287,15 @@ display:
 
           it.filled_circle(272, 650.2, 268);
           it.filled_circle(272, 650.2, 264, COLOR_OFF);
-          it.filled_circle(272, 650.2, 260);
+          it.filled_circle(272, 650.2, 259);
 
           it.filled_rectangle(12, 650.2, 520, 298.3);
           it.filled_rectangle(16, 650.2, 512, 294.3, COLOR_OFF);
 
-          it.filled_circle(272, 650.2, 256, COLOR_OFF);
+          it.filled_circle(272, 650.2, 255, COLOR_OFF);
 
-
-
-
+          it.filled_rectangle(0, 0, 13, 960, COLOR_OFF);
+          it.filled_rectangle(531, 0, 13, 960, COLOR_OFF);
 
 
           // Steinway

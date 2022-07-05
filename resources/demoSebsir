@@ -1,0 +1,24 @@
+- scan_interval: 60
+  resource: https://gbfs.citibikenyc.com/gbfs/en/station_status.json
+
+sensor:
+  - platform: rest
+    name: CitiSensors
+    resource: https://gbfs.citibikenyc.com/gbfs/en/station_status.json
+    json_attributes_path: "$.data.stations"
+    json_attributes:
+      - 72
+      - 4715
+      - 4723
+    value_template: "OK"
+  - platform: template
+    sensors:
+      72_bikes:
+        value_template: "{{ state_attr('sensor.legacy_id', '72')['num_bikes_available'] }}"
+        unit_of_measurement: "Bikes"
+      4715_bikes:
+        value_template: "{{ state_attr('sensor.legacy_id', '4715')['num_bikes_available'] }}"
+        unit_of_measurement: "Bikes"
+      4723_bikes:
+        value_template: "{{ state_attr('sensor.legacy_id', '4723')['num_bikes_available'] }}"
+        unit_of_measurement: "Bikes"

@@ -1,0 +1,46 @@
+{
+  "coord": {
+    "lon": -73.911,
+    "lat": 40.7763
+  },
+  "weather": [
+    {
+      "id": 803,
+      "main": "Clouds",
+      "description": "broken clouds",
+      "icon": "04n"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 275.55,
+    "feels_like": 270.27,
+    "temp_min": 274.24,
+    "temp_max": 276.08,
+    "pressure": 1024,
+    "humidity": 73,
+    "sea_level": 1024,
+    "grnd_level": 1022
+  },
+  "visibility": 10000,
+  "wind": {
+    "speed": 7.13,
+    "deg": 312,
+    "gust": 14.96
+  },
+  "clouds": {
+    "all": 67
+  },
+  "dt": 1645833374,
+  "sys": {
+    "type": 1,
+    "id": 4686,
+    "country": "US",
+    "sunrise": 1645788955,
+    "sunset": 1645828910
+  },
+  "timezone": -18000,
+  "id": 0,
+  "name": "Astoria",
+  "cod": 200
+}

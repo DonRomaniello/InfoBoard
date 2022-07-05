@@ -1,0 +1,63 @@
+89c8e490-85d4-48d4-9dbd-bdcd6e39a372
+
+
+
+https://bustime.mta.info/api/siri/stop-monitoring.json
+
+
+https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=308209&LineRef=MTA%20NYCT_B63
+
+http://gtfsrt.prod.obanyc.com/vehiclePositions?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372
+
+
+
+
+
+Q69 Towards Steinway
+21 ST/DITMARS BL
+553077
+https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=553077
+
+$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime
+
+
+$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit
+[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime
+
+
+
+Q69 Towards QBP
+552956
+
+Q100 Towards QBP
+Cherry Valley
+553229
+
+Q100 Towards Rikers
+Cherry Valley
+553228
+
+
+
+- name: Q69 Towards Steinway
+  scan_interval: 60
+  resource: https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=553077
+  json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit"
+  json_attributes:
+    - "[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"
+    - "[1].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"
+    - "[2].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"
+
+
+
+- authentication: digest
+  scan_interval: 60
+  resource: https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=553077
+    sensor:
+      - name: "Q69 Towards Steinway"
+        json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit"
+        value_template: "OK"
+        json_attributes:
+            - "[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"
+            - "[1].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"
+            - "[2].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime"

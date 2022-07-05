@@ -1,0 +1,133 @@
+external_components:
+  - source:
+      type: git
+      url: https://github.com/vbaksa/esphome
+      ref: dev
+    components: [lilygo_t5_47_display, lilygo_t5_47_battery]
+
+
+substitutions:
+  esp_name: ESP Display #Device Name
+  esp_hostname: esp-display 
+  run_time: 5min #can be as long as needed to get data 
+  sleep_time: 20min # normal sleep time
+  night_sleep_time: 6h # 1st sleep time after midnight
+  
+esphome:
+  name: ${esp_hostname}
+  platform: ESP32
+  board: esp32dev
+  on_boot:
+  - script.execute: consider_deep_sleep
+  # on_boot:
+  #   - lambda: |-
+  #       id(ota_id).set_auth_password("quoh5aet1Veiv0bi8eixaejeeteixeif");
+
+wifi:
+  ssid: "MommySaid"
+  password: "Fei4Ooch5feiqu4Wee9eil4zei6ujah9"
+  ap:
+    ssid: "${esp_name} Fallback Hotspot"
+    password: "Ulie1cuingaisho0"
+
+deep_sleep:
+  id: deep_sleep_control
+  sleep_duration: 50s
+
+ota:
+  password: "quoh5aet1Veiv0bi8eixaejeeteixeif"
+  id: ota_id
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "Aijoo5quaj7al6eiph9zoomi1Ooz7ahp"
+
+time:
+  - platform: homeassistant
+    id: ntp
+
+spi:
+  clk_pin: 18
+  mosi_pin: 23
+
+font:
+  - file: "/Users/donromaniello/Library/Fonts/Ubuntu-Light.ttf"
+    id: ubuntu
+    size: 64
+
+sensor:
+  # - platform: homeassistant
+  #   id: don_dist
+  #   entity_id: sensor.destiny_distance
+  #   attribute: Distance
+  - platform: lilygo_t5_47_battery
+    id: battery
+    update_interval: 5s
+    voltage:
+      name: "Battery Voltage"
+  # - platform: template
+  #   name: "${esp_name} Battery"
+  #   id: batt
+  #   unit_of_measurement: "%"
+  #   accuracy_decimals: 0
+  #   device_class: battery
+  #   lambda: |-
+  #     int y = (1-(4.1-id(battery).voltage->state)/(4.1-3.3))*100;
+  #     if (y < 100) {return y;} else {return 100;};      
+
+
+# display:
+#   - platform: lilygo_t5_47_display
+#     clear: true
+#     full_update_every: 0
+#     lambda: |-    
+#       // it.line(it.get_width(), it.get_height(),  0, 0);
+#       // Print the string "Hello World!" at [0,10]
+#       // it.print(10, 10, id(ubuntu), "Hello World!");
+#       it.printf(10, 10, id(ubuntu), "%.0f", id(don_bat).state);
+
+# graph:
+#   - id: don_distance
+#     sensor: don_dist
+#     duration: 24h
+#     width: 100
+#     height: 100
+
+display:
+  - platform: lilygo_t5_47_display
+    clear: false
+    update_interval: 5s
+    rotation: 270
+    lambda: |-    
+      // it.line(it.get_width(), it.get_height(),  0, 0);
+      // Print the string "Hello World!" at [0,10]
+      // it.print(10, 10, id(ubuntu), "Hello World!");
+      it.printf(10, 10, id(ubuntu), "%.3f", id(battery).voltage->state);
+      //it.graph(100, 100, id(don_distance));
+
+
+# Deep Sleep Prevention
+
+binary_sensor:
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    name: Prevent Deep Sleep
+    entity_id: input_boolean.prevent_deep_sleep
+
+
+script:
+  - id: consider_deep_sleep
+    mode: queued
+    then:
+      - delay: 10s
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Skipping sleep, per prevent_deep_sleep'
+          else:
+            - deep_sleep.enter: deep_sleep_control
+      - script.execute: consider_deep_sleep

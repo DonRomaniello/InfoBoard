@@ -1,0 +1,43 @@
+- authentication: digest
+  scan_interval: 60
+  resource: https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=553077
+  sensor:
+    - name: "Q69Steinway0"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[0].MonitoredVehicleJourney.MonitoredCall"
+      value_template: "{{ value_json.ExpectedArrivalTime }}"
+      json_attributes:
+        - ExpectedArrivalTime
+    - name: "Q69Steinway1"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[1].MonitoredVehicleJourney.MonitoredCall"
+      value_template: "{{ value_json.ExpectedArrivalTime }}"
+      json_attributes:
+        - ExpectedArrivalTime
+    - name: "Q69Steinway2"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[2].MonitoredVehicleJourney.MonitoredCall"
+      value_template: "{{ value_json.ExpectedArrivalTime }}"
+      json_attributes:
+        - ExpectedArrivalTime
+
+- authentication: digest
+  scan_interval: 60
+  resource: https://bustime.mta.info/api/siri/stop-monitoring.json?key=89c8e490-85d4-48d4-9dbd-bdcd6e39a372&OperatorRef=MTA&MonitoringRef=552956
+  sensor:
+    - name: "Q69QBP0"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[0].MonitoredVehicleJourney.MonitoredCall"
+      value_template: "{{ value_json.ExpectedArrivalTime }}"
+      json_attributes:
+        - ExpectedArrivalTime
+    - name: "Q69QBP1"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[1].MonitoredVehicleJourney.MonitoredCall"
+      value_template: "{{ value_json.ExpectedArrivalTime }}"
+      json_attributes:
+        - ExpectedArrivalTime
+    - name: "Q69QBP2"
+      json_attributes_path: "$.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[2].MonitoredVehicleJourney.MonitoredCall"
+      value_template: "{{ value_json.ExpectedArrivalTime }}"
+      json_attributes:
+        - ExpectedArrivalTime
+
+
+{% set s = state_attr('sensor.q69steinway0', 'ExpectedArrivalTime') %}
+{{ s[11:16] }}
